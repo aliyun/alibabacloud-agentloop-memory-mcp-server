@@ -12,7 +12,10 @@ import contextvars
 import json
 import logging
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
+
+load_dotenv()
 from fastapi.routing import APIRouter
 from mcp.server.fastmcp import FastMCP
 from mcp.server.sse import SseServerTransport

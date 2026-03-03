@@ -16,8 +16,11 @@ import subprocess
 import sys
 import time
 
+import dotenv
 import httpx
 import pytest
+
+dotenv.load_dotenv()
 
 pytestmark = pytest.mark.integration
 
