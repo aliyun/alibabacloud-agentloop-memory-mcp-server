@@ -1,0 +1,52 @@
+[project]
+name = "alibabacloud-agentloop-memory-mcp-server"
+version = "0.1.0"
+description = "Alibaba Cloud AgentLoop Memory MCP Server - MCP Server for cloud-hosted memory management"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+dependencies = [
+    "mcp>=1.3.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.27.0",
+    "alibabacloud-cms20240330>=6.0.1",
+    "alibabacloud-tea-openapi>=0.3.0",
+    "alibabacloud-tea-util>=0.3.0",
+    "click>=8.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_server_agentloop_memory"]
+
+[tool.hatch.build]
+include = [
+    "src/**/*.py",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+]
+exclude = [
+    "**/*.pyc",
+    "**/__pycache__",
+    ".git",
+    ".env",
+    "tests/",
+    "dist/",
+    "build/",
+    "*.egg-info/",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "httpx>=0.24.0",
+]
+
+[project.scripts]
+alibabacloud-agentloop-memory-mcp-server = "mcp_server_agentloop_memory:main"
