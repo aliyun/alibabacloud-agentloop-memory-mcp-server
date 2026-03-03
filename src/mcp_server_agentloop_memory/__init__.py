@@ -22,9 +22,8 @@ dotenv.load_dotenv()
 @click.option(
     "--region-id",
     type=str,
-    help="Alibaba Cloud region ID",
-    default="cn-hangzhou",
-    show_default=True,
+    help="Alibaba Cloud region ID (env: ALIBABA_CLOUD_REGION_ID)",
+    default=None,
 )
 @click.option(
     "--workspace",
@@ -78,6 +77,7 @@ def main(
 
     ak_id = access_key_id or os.getenv("ALIBABA_CLOUD_ACCESS_KEY_ID")
     ak_secret = access_key_secret or os.getenv("ALIBABA_CLOUD_ACCESS_KEY_SECRET")
+    region = region_id or os.getenv("ALIBABA_CLOUD_REGION_ID", "cn-hangzhou")
     ws = workspace or os.getenv("ALIBABA_CLOUD_WORKSPACE")
     ms = memory_store or os.getenv("ALIBABA_CLOUD_MEMORY_STORE")
 
@@ -98,7 +98,7 @@ def main(
     run_server(
         access_key_id=ak_id,
         access_key_secret=ak_secret,
-        region_id=region_id,
+        region_id=region,
         workspace=ws,
         memory_store=ms,
         host=host,
