@@ -50,7 +50,7 @@ python -m mcp_server_agentloop_memory \
   --region-id cn-hangzhou \
   --workspace <workspace_name> \
   --memory-store <memory_store_name> \
-  --port 8765
+  --port 8080
 ```
 
 ### 3. 连接 MCP Client
@@ -58,7 +58,7 @@ python -m mcp_server_agentloop_memory \
 服务启动后，MCP Client 通过 SSE 连接：
 
 ```
-GET http://localhost:8765/mcp/{client_name}/sse/{user_id}
+GET http://localhost:8080/mcp/{client_name}/sse/{user_id}
 ```
 
 - `client_name`：客户端标识（如 `cursor`、`my-agent`），映射为 `agent_id`
@@ -74,7 +74,7 @@ GET http://localhost:8765/mcp/{client_name}/sse/{user_id}
 | `--workspace` | `ALIBABA_CLOUD_WORKSPACE` | - | Workspace 名称 |
 | `--memory-store` | `ALIBABA_CLOUD_MEMORY_STORE` | - | Memory Store 名称 |
 | `--host` | - | `0.0.0.0` | 监听地址 |
-| `--port` | - | `8765` | 监听端口 |
+| `--port` | - | `8080` | 监听端口 |
 | `--log-level` | - | `INFO` | 日志级别 |
 
 ## MCP Tools

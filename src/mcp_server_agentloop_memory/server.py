@@ -387,7 +387,7 @@ def run_server(
     access_key_id: Optional[str] = None,
     access_key_secret: Optional[str] = None,
     host: str = "0.0.0.0",
-    port: int = 8765,
+    port: int = 8080,
     log_level: str = "INFO",
 ) -> None:
     """Initialize CMS client, build FastAPI app, and start uvicorn."""

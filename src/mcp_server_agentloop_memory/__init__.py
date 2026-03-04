@@ -50,7 +50,7 @@ dotenv.load_dotenv()
     "--port",
     type=int,
     help="Server port",
-    default=8765,
+    default=8080,
     show_default=True,
 )
 @click.option(
