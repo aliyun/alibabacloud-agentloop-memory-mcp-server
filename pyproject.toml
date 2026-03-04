@@ -12,6 +12,7 @@ dependencies = [
     "alibabacloud-cms20240330>=6.0.1",
     "alibabacloud-tea-openapi>=0.3.0",
     "alibabacloud-tea-util>=0.3.0",
+    "alibabacloud-credentials>=0.3.0",
     "click>=8.0.0",
     "python-dotenv>=1.0.0",
 ]

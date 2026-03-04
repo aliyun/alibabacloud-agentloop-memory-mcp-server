@@ -10,13 +10,15 @@ dotenv.load_dotenv()
 @click.option(
     "--access-key-id",
     type=str,
-    help="Alibaba Cloud AccessKey ID (env: ALIBABA_CLOUD_ACCESS_KEY_ID)",
+    help="Alibaba Cloud AccessKey ID. "
+    "If not provided, credentials are resolved via the default credential chain "
+    "(env vars, OIDC, config file, ECS RAM role, etc.).",
     default=None,
 )
 @click.option(
     "--access-key-secret",
     type=str,
-    help="Alibaba Cloud AccessKey Secret (env: ALIBABA_CLOUD_ACCESS_KEY_SECRET)",
+    help="Alibaba Cloud AccessKey Secret. Must be used together with --access-key-id.",
     default=None,
 )
 @click.option(
@@ -72,20 +74,20 @@ def main(
 
     Provides memory management tools via MCP protocol over SSE transport.
     Connect at: GET /mcp/{client_name}/sse/{user_id}
+
+    Credential resolution order:
+
+    \b
+      1. CLI args --access-key-id / --access-key-secret (highest priority)
+      2. RAM Role ARN (env ALIBABA_CLOUD_ROLE_ARN + AK/SK env vars)
+      3. Default credential chain (env AK/SK, OIDC, config file, ECS RAM role, etc.)
     """
     from mcp_server_agentloop_memory.server import run_server
 
-    ak_id = access_key_id or os.getenv("ALIBABA_CLOUD_ACCESS_KEY_ID")
-    ak_secret = access_key_secret or os.getenv("ALIBABA_CLOUD_ACCESS_KEY_SECRET")
     region = region_id or os.getenv("ALIBABA_CLOUD_REGION_ID", "cn-hangzhou")
     ws = workspace or os.getenv("ALIBABA_CLOUD_WORKSPACE")
     ms = memory_store or os.getenv("ALIBABA_CLOUD_MEMORY_STORE")
 
-    if not ak_id or not ak_secret:
-        raise click.UsageError(
-            "AccessKey credentials required. Use --access-key-id/--access-key-secret "
-            "or set ALIBABA_CLOUD_ACCESS_KEY_ID/ALIBABA_CLOUD_ACCESS_KEY_SECRET env vars."
-        )
     if not ws:
         raise click.UsageError(
             "Workspace required. Use --workspace or set ALIBABA_CLOUD_WORKSPACE env var."
@@ -96,11 +98,11 @@ def main(
         )
 
     run_server(
-        access_key_id=ak_id,
-        access_key_secret=ak_secret,
         region_id=region,
         workspace=ws,
         memory_store=ms,
+        access_key_id=access_key_id,
+        access_key_secret=access_key_secret,
         host=host,
         port=port,
         log_level=log_level,

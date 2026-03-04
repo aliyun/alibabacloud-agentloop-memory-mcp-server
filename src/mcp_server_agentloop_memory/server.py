@@ -20,10 +20,15 @@ from fastapi.routing import APIRouter
 from mcp.server.fastmcp import FastMCP
 from mcp.server.sse import SseServerTransport
 
+from typing import Optional
+
 from alibabacloud_cms20240330.client import Client as CmsClient
 from alibabacloud_cms20240330 import models as cms_models
 from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_tea_util import models as util_models
+from alibabacloud_credentials.client import Client as CredClient
+from alibabacloud_credentials.models import Config as CredConfig
+from alibabacloud_credentials.utils import auth_util
 
 from mcp_server_agentloop_memory.config import (
     READ_TIMEOUT_MS,
@@ -32,6 +37,44 @@ from mcp_server_agentloop_memory.config import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _create_cms_config(
+    access_key_id: Optional[str] = None,
+    access_key_secret: Optional[str] = None,
+) -> open_api_models.Config:
+    """Create an OpenAPI config with unified credential resolution.
+
+    Resolution order:
+      1. CLI-provided AK/SK (only when both are explicitly passed via command-line args).
+      2. RAM Role ARN (env ALIBABA_CLOUD_ROLE_ARN + AK/SK env vars → STS AssumeRole).
+      3. Default credential chain handled by alibabacloud-credentials SDK:
+         env AK/SK → OIDC → config file → ECS RAM role → credentials URI.
+    """
+    if access_key_id and access_key_secret:
+        logger.info("Credential: using CLI-provided AK/SK")
+        return open_api_models.Config(
+            access_key_id=access_key_id,
+            access_key_secret=access_key_secret,
+        )
+
+    if auth_util.environment_role_arn:
+        logger.info(f"Credential: using Role-ARN {auth_util.environment_role_arn}")
+        credentials_client = CredClient(
+            CredConfig(
+                type="ram_role_arn",
+                access_key_id=auth_util.environment_access_key_id,
+                access_key_secret=auth_util.environment_access_key_secret,
+                role_arn=auth_util.environment_role_arn,
+                role_session_name=auth_util.environment_role_session_name,
+            )
+        )
+        return open_api_models.Config(credential=credentials_client)
+
+    logger.info("Credential: using default credential chain")
+    credentials_client = CredClient()
+    return open_api_models.Config(credential=credentials_client)
+
 
 # ---------------------------------------------------------------------------
 # Module-level state – populated by run_server()
@@ -338,11 +381,11 @@ def _create_app() -> FastAPI:
 
 def run_server(
     *,
-    access_key_id: str,
-    access_key_secret: str,
     region_id: str,
     workspace: str,
     memory_store: str,
+    access_key_id: Optional[str] = None,
+    access_key_secret: Optional[str] = None,
     host: str = "0.0.0.0",
     port: int = 8765,
     log_level: str = "INFO",
@@ -354,11 +397,8 @@ def run_server(
 
     global _cms_client, _workspace, _memory_store
 
-    config = open_api_models.Config(
-        access_key_id=access_key_id,
-        access_key_secret=access_key_secret,
-        endpoint=cms_endpoint(region_id),
-    )
+    config = _create_cms_config(access_key_id, access_key_secret)
+    config.endpoint = cms_endpoint(region_id)
     _cms_client = CmsClient(config)
     _workspace = workspace
     _memory_store = memory_store
