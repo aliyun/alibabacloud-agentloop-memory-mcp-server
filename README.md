@@ -1,6 +1,20 @@
 # alibabacloud-agentloop-memory-mcp-server
 
-基于阿里云 CMS (alibabacloud_cms20240330) SDK 的 Memory MCP Server，提供记忆管理能力，支持通过 MCP 协议（SSE 传输）进行记忆的增删改查和语义搜索。
+阿里云 AgentLoop MemoryStore 的 MCP Server 实现，为 AI Agent 提供长期记忆管理能力，支持通过 MCP 协议（SSE 传输）进行记忆的增删改查和语义搜索。
+
+## AgentLoop MemoryStore
+
+[AgentLoop MemoryStore](https://www.alibabacloud.com/) 是阿里云提供的全托管 AI Agent 长期记忆服务。它为 AI Agent 提供智能记忆层，使其能够跨会话记住用户偏好、持续学习并实现个性化交互，适用于智能客服、个人助理、教育辅导等场景。
+
+**核心特性：**
+
+- **多维度记忆**：自动从对话中提取用户偏好、事实陈述、会话摘要等结构化记忆，支持自定义提取策略
+- **分层检索**：L1 混合检索 → L2 Rerank 精排 → L3 Agentic Search，兼顾召回广度与精度
+- **异步提取**：记忆处理异步执行，不阻塞 Agent 主流程，支持弹性扩缩容
+- **全托管**：无需搭建向量数据库或维护存储实例，开通即用
+- **可观测**：内置监控大盘，覆盖检索延迟、Token 消耗、存储量等核心指标
+
+本项目将 AgentLoop MemoryStore 封装为标准 [MCP](https://modelcontextprotocol.io/) Server，支持 Cursor、Claude Desktop 等 MCP 客户端直接接入。
 
 ## 安装
 
@@ -15,6 +29,7 @@ pip install alibabacloud-agentloop-memory-mcp-server
 ```bash
 export ALIBABA_CLOUD_ACCESS_KEY_ID=your_access_key_id
 export ALIBABA_CLOUD_ACCESS_KEY_SECRET=your_access_key_secret
+export ALIBABA_CLOUD_REGION_ID=cn-hangzhou
 export ALIBABA_CLOUD_WORKSPACE=your_workspace_name
 export ALIBABA_CLOUD_MEMORY_STORE=your_memory_store_name
 ```
@@ -32,9 +47,9 @@ alibabacloud-agentloop-memory-mcp-server
 python -m mcp_server_agentloop_memory \
   --access-key-id <your_ak_id> \
   --access-key-secret <your_ak_secret> \
+  --region-id cn-hangzhou \
   --workspace <workspace_name> \
   --memory-store <memory_store_name> \
-  --region-id cn-hangzhou \
   --port 8765
 ```
 
@@ -56,7 +71,7 @@ GET http://localhost:8765/mcp/{client_name}/sse/{user_id}
 | `--access-key-id` | `ALIBABA_CLOUD_ACCESS_KEY_ID` | - | 阿里云 AccessKey ID |
 | `--access-key-secret` | `ALIBABA_CLOUD_ACCESS_KEY_SECRET` | - | 阿里云 AccessKey Secret |
 | `--region-id` | `ALIBABA_CLOUD_REGION_ID` | `cn-hangzhou` | 阿里云区域 |
-| `--workspace` | `ALIBABA_CLOUD_WORKSPACE` | - | CMS Workspace 名称 |
+| `--workspace` | `ALIBABA_CLOUD_WORKSPACE` | - | Workspace 名称 |
 | `--memory-store` | `ALIBABA_CLOUD_MEMORY_STORE` | - | Memory Store 名称 |
 | `--host` | - | `0.0.0.0` | 监听地址 |
 | `--port` | - | `8765` | 监听端口 |
@@ -67,14 +82,14 @@ GET http://localhost:8765/mcp/{client_name}/sse/{user_id}
 | 工具名 | 参数 | 说明 |
 |--------|------|------|
 | `add_memories` | `text: str` | 添加记忆。当用户分享个人信息、偏好或要求记住某些内容时调用 |
-| `search_memory` | `query: str` | 语义搜索记忆。用户提问时调用 |
+| `search_memory` | `query: str` | 语义搜索记忆。用户提问时自动调用，返回按相关度排序的记忆 |
 | `list_memories` | 无 | 列出当前用户的所有记忆 |
 | `delete_memories` | `memory_ids: list[str]` | 按 ID 删除指定记忆 |
 | `delete_all_memories` | 无 | 删除当前用户的所有记忆 |
 
 ## 权限要求
 
-需要阿里云 RAM 用户具有 CMS Memory 相关 API 的访问权限。获取和管理 AccessKey 请参考 [阿里云 AccessKey 管理](https://help.aliyun.com/document_detail/53045.html)。
+需要阿里云 RAM 用户具有 AgentLoop MemoryStore 相关 API 的访问权限。获取和管理 AccessKey 请参考[阿里云 AccessKey 管理](https://help.aliyun.com/document_detail/53045.html)。
 
 ## 开发
 
@@ -86,6 +101,4 @@ pip install -e ".[dev]"
 pytest tests/ -v
 ```
 
-## License
 
-Apache-2.0
