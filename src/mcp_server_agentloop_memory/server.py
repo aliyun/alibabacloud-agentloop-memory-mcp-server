@@ -372,6 +372,11 @@ def _create_app() -> FastAPI:
     )
     mcp._mcp_server.name = "agentloop-memory-mcp-server"
     app.include_router(mcp_router)
+
+    @app.get("/sse")
+    async def health_check():
+        return {"status": "ok"}
+
     return app
 
 
