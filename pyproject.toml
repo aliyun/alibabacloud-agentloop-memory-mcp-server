@@ -16,6 +16,7 @@ dependencies = [
     "alibabacloud-openapi-util>=0.2.0",
     "click>=8.0.0",
     "python-dotenv>=1.0.0",
+    "alibabacloud-cms20240330>=6.2.0",
 ]
 
 [build-system]
@@ -23,7 +24,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mcp_server_agentloop_memory", "src/alibabacloud_cms20240330"]
+packages = ["src/mcp_server_agentloop_memory"]
 
 [tool.hatch.build]
 include = [
